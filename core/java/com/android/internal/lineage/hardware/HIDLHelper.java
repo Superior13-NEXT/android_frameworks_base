@@ -31,7 +31,9 @@ class HIDLHelper {
         for (int i = 0; i < size; i++) {
             vendor.lineage.touch.V1_0.Gesture g = gestures.get(i);
             r[i] = new TouchscreenGesture(g.id, g.name, g.keycode);
-       }
+        }
+        return r;
+    }
 
     static DisplayMode[] fromHIDLModes(
             ArrayList<vendor.lineage.livedisplay.V2_0.DisplayMode> modes) {
@@ -79,5 +81,4 @@ class HIDLHelper {
     static Range<Float> fromHIDLRange(vendor.lineage.livedisplay.V2_0.FloatRange range) {
         return new Range(range.min, range.max);
     }
-
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.custom.app;
+package com.android.internal.lineage.app;
 
 import android.annotation.SdkConstant;
 
