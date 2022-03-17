@@ -19123,6 +19123,12 @@ public final class Settings {
         public static final String ALARM_BLOCKING_ENABLED = "alarm_blocking_enabled";
 
         /**
+         * Control whether application downgrade is allowed.
+         * @hide
+         */
+        public static final String PM_DOWNGRADE_ALLOWED = "pm_downgrade_allowed";
+
+        /**
          * Setting indicating whether Low Power Standby is enabled, if supported.
          *
          * Values are:
