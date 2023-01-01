@@ -38,6 +38,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.AttributeSet;
@@ -1051,8 +1052,14 @@ public class NavigationBarView extends FrameLayout implements
                             com.android.internal.R.dimen.navigation_bar_height_landscape)
                     : getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_height);
-            int frameHeight = getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.navigation_bar_frame_height);
+            int frameHeight;
+	    if (isHideIMESpaceEnabled()) {
+              frameHeight = getResources().getDimensionPixelSize(
+                      com.android.internal.R.dimen.navigation_bar_frame_height_hide_ime);
+	    } else {
+              frameHeight = getResources().getDimensionPixelSize(
+                      com.android.internal.R.dimen.navigation_bar_frame_height);	    
+	    }
             mBarTransitions.setBackgroundFrame(new Rect(0, frameHeight - height, w, h));
         } else {
             mBarTransitions.setBackgroundFrame(null);
@@ -1278,5 +1285,10 @@ public class NavigationBarView extends FrameLayout implements
 
     interface UpdateActiveTouchRegionsCallback {
         void update();
+    }
+    
+    public boolean isHideIMESpaceEnabled() {
+        return Settings.System.getIntForUser(getContext().getContentResolver(),
+                     Settings.System.HIDE_IME_SPACE_ENABLE , 0, UserHandle.USER_CURRENT) != 0;
     }
 }
