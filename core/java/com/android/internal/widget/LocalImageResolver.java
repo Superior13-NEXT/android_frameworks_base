@@ -238,7 +238,7 @@ public class LocalImageResolver {
         // our API contract.
         } catch (IOException | Resources.NotFoundException e) {
             if (DEBUG) {
-                Log.d(TAG, "Couldn't use ImageDecoder for drawable, falling back to non-resized load.");
+               // Log.d(TAG, "Couldn't use ImageDecoder for drawable, falling back to non-resized load.");
             }
             return null;
         }
