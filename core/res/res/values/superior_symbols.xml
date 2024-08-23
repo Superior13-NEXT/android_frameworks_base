@@ -215,4 +215,6 @@
     <!-- These are system packages exempted from privacy indicator -->
     <java-symbol type="array" name="config_indicatorExemptedPackageNames" />
 
+    <!-- KeyboxImitationHooks -->
+    <java-symbol type="array" name="config_certifiedKeybox" />
 </resources>
