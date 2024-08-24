@@ -38,6 +38,9 @@
     <java-symbol name="reboot_system_title" type="string" />
     <java-symbol name="reboot_system_message" type="string" />
     <java-symbol type="array" name="config_rebootActionsList" />
+    <java-symbol type="string" name="system_reboot_title" />
+    <java-symbol type="string" name="system_reboot_message" />
+    <java-symbol type="string" name="reboot_title" />
 
     <!-- Light / Regular style fonts -->
     <java-symbol type="string" name="config_lightFontFamily" />

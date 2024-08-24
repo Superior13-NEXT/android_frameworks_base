@@ -39,7 +39,10 @@
     <string name="reboot_to_recovery_message">Rebooting to recovery\u2026</string>
     <string name="reboot_system_title">Restart system</string>
     <string name="reboot_system_message">Restarting system\u2026</string>
-
+    <string name="system_reboot_title">System reboot required</string>
+    <string name="system_reboot_message">For all the changes to take effect, a system reboot is required.</string>
+    <string name="reboot_title">Reboot</string>
+     
     <!-- Cycle through ringer modes -->
     <string name="volume_dialog_ringer_guidance_normal">Calls and notifications will ring</string>
     
