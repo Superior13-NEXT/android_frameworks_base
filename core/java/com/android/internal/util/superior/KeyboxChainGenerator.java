@@ -223,15 +223,42 @@ public final class KeyboxChainGenerator {
         return null;
     }
 
+    // SAFE getOsVersion for Android 13, 14, and above
     private static int getOsVersion() {
         String release = Build.VERSION.RELEASE;
         int major = 0, minor = 0, patch = 0;
 
-        String[] parts = release.split("\\.");
-        if (parts.length > 0) major = Integer.parseInt(parts[0]);
-        if (parts.length > 1) minor = Integer.parseInt(parts[1]);
-        if (parts.length > 2) patch = Integer.parseInt(parts[2]);
-
+        // Cek apakah release berupa angka (misal "13.0.0")
+        if (release != null && release.matches("\\d+(\\.\\d+)*")) {
+            String[] parts = release.split("\\.");
+            if (parts.length > 0) {
+                try {
+                    major = Integer.parseInt(parts[0]);
+                } catch (NumberFormatException e) {
+                    major = 0;
+                }
+            }
+            if (parts.length > 1) {
+                try {
+                    minor = Integer.parseInt(parts[1]);
+                } catch (NumberFormatException e) {
+                    minor = 0;
+                }
+            }
+            if (parts.length > 2) {
+                try {
+                    patch = Integer.parseInt(parts[2]);
+                } catch (NumberFormatException e) {
+                    patch = 0;
+                }
+            }
+        } else {
+            // Jika release bukan angka (misal Android 14+ "Baklava"), gunakan SDK_INT
+            major = Build.VERSION.SDK_INT;
+            minor = 0;
+            patch = 0;
+        }
+        // Output format: major * 10000 + minor * 100 + patch
         return major * 10000 + minor * 100 + patch;
     }
 
@@ -329,24 +356,24 @@ public final class KeyboxChainGenerator {
         return new DEROctetString(new DERSequence(applicationIdAA).getEncoded());
     }
 
-public static final class Digest {
-	private final byte[] digest;
+    public static final class Digest {
+        private final byte[] digest;
 
-	public Digest(byte[] digest) {
-	this.digest = digest;
-	}
+        public Digest(byte[] digest) {
+            this.digest = digest;
+        }
 
-	public byte[] getDigest() {
-	return digest;
-	}
+        public byte[] getDigest() {
+            return digest;
+        }
 
         @Override
         public boolean equals(@Nullable Object o) {
-	if (o instanceof Digest) {
-		Digest d = (Digest) o;
-		return Arrays.equals(digest, d.digest);
-		}
-	return false;
+            if (o instanceof Digest) {
+                Digest d = (Digest) o;
+                return Arrays.equals(digest, d.digest);
+            }
+            return false;
         }
 
         @Override
@@ -406,58 +433,58 @@ public static final class Digest {
             for (var kp : params) {
                 var p = kp.value;
                 switch (kp.tag) {
-            case Tag.KEY_SIZE:
-                keySize = p.getInteger();
-                break;
-            case Tag.ALGORITHM:
-                algorithm = p.getAlgorithm();
-                break;
-            case Tag.CERTIFICATE_SERIAL:
-                certificateSerial = new BigInteger(p.getBlob());
-                break;
-            case Tag.CERTIFICATE_NOT_BEFORE:
-                certificateNotBefore = new Date(p.getDateTime());
-                break;
-            case Tag.CERTIFICATE_NOT_AFTER:
-                certificateNotAfter = new Date(p.getDateTime());
-                break;
-            case Tag.CERTIFICATE_SUBJECT:
-                certificateSubject = new X500Name(new X500Principal(p.getBlob()).getName());
-                break;
-            case Tag.RSA_PUBLIC_EXPONENT:
-                rsaPublicExponent = new BigInteger(p.getBlob());
-                break;
-            case Tag.EC_CURVE:
-                ecCurve = p.getEcCurve();
-                ecCurveName = getEcCurveName(ecCurve);
-                break;
-            case Tag.PURPOSE:
-                purpose.add(p.getKeyPurpose());
-                break;
-            case Tag.DIGEST:
-                digest.add(p.getDigest());
-                break;
-            case Tag.ATTESTATION_CHALLENGE:
-                attestationChallenge = p.getBlob();
-                break;
-            case Tag.ATTESTATION_ID_BRAND:
-                brand = p.getBlob();
-                break;
-            case Tag.ATTESTATION_ID_DEVICE:
-                device = p.getBlob();
-                break;
-            case Tag.ATTESTATION_ID_PRODUCT:
-                product = p.getBlob();
-                break;
-            case Tag.ATTESTATION_ID_MANUFACTURER:
-                manufacturer = p.getBlob();
-                break;
-            case Tag.ATTESTATION_ID_MODEL:
-                model = p.getBlob();
-                break;
-            case Tag.HARDWARE_TYPE:
-                securityLevel = p.getSecurityLevel();
-                break;
+                    case Tag.KEY_SIZE:
+                        keySize = p.getInteger();
+                        break;
+                    case Tag.ALGORITHM:
+                        algorithm = p.getAlgorithm();
+                        break;
+                    case Tag.CERTIFICATE_SERIAL:
+                        certificateSerial = new BigInteger(p.getBlob());
+                        break;
+                    case Tag.CERTIFICATE_NOT_BEFORE:
+                        certificateNotBefore = new Date(p.getDateTime());
+                        break;
+                    case Tag.CERTIFICATE_NOT_AFTER:
+                        certificateNotAfter = new Date(p.getDateTime());
+                        break;
+                    case Tag.CERTIFICATE_SUBJECT:
+                        certificateSubject = new X500Name(new X500Principal(p.getBlob()).getName());
+                        break;
+                    case Tag.RSA_PUBLIC_EXPONENT:
+                        rsaPublicExponent = new BigInteger(p.getBlob());
+                        break;
+                    case Tag.EC_CURVE:
+                        ecCurve = p.getEcCurve();
+                        ecCurveName = getEcCurveName(ecCurve);
+                        break;
+                    case Tag.PURPOSE:
+                        purpose.add(p.getKeyPurpose());
+                        break;
+                    case Tag.DIGEST:
+                        digest.add(p.getDigest());
+                        break;
+                    case Tag.ATTESTATION_CHALLENGE:
+                        attestationChallenge = p.getBlob();
+                        break;
+                    case Tag.ATTESTATION_ID_BRAND:
+                        brand = p.getBlob();
+                        break;
+                    case Tag.ATTESTATION_ID_DEVICE:
+                        device = p.getBlob();
+                        break;
+                    case Tag.ATTESTATION_ID_PRODUCT:
+                        product = p.getBlob();
+                        break;
+                    case Tag.ATTESTATION_ID_MANUFACTURER:
+                        manufacturer = p.getBlob();
+                        break;
+                    case Tag.ATTESTATION_ID_MODEL:
+                        model = p.getBlob();
+                        break;
+                    case Tag.HARDWARE_TYPE:
+                        securityLevel = p.getSecurityLevel();
+                        break;
                 }
             }
         }
@@ -465,24 +492,24 @@ public static final class Digest {
         private static String getEcCurveName(int curve) {
             String res;
             switch (curve) {
-		case EcCurve.CURVE_25519:
-		res = "CURVE_25519";
-		break;
-		case EcCurve.P_224:
-		res = "secp224r1";
-		break;
-		case EcCurve.P_256:
-		res = "secp256r1";
-		break;
-		case EcCurve.P_384:
-		res = "secp384r1";
-		break;
-		case EcCurve.P_521:
-		res = "secp521r1";
-		break;
-		default:
-		throw new IllegalArgumentException("unknown curve");
-		}
+                case EcCurve.CURVE_25519:
+                    res = "CURVE_25519";
+                    break;
+                case EcCurve.P_224:
+                    res = "secp224r1";
+                    break;
+                case EcCurve.P_256:
+                    res = "secp256r1";
+                    break;
+                case EcCurve.P_384:
+                    res = "secp384r1";
+                    break;
+                case EcCurve.P_521:
+                    res = "secp521r1";
+                    break;
+                default:
+                    throw new IllegalArgumentException("unknown curve");
+            }
             return res;
         }
     }
