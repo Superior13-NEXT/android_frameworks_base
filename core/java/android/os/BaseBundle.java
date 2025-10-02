@@ -462,7 +462,6 @@ public class BaseBundle {
             }
         } finally {
             recycleParcel &= (numLazyValues[0] == 0);
-        }
             mMap = map;
             if (recycleParcel) {
                 recycleParcel(parcelledData);
