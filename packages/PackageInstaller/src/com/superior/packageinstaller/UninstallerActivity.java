@@ -43,6 +43,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -159,13 +160,16 @@ public class UninstallerActivity extends Activity {
         if (mDialogInfo.user == null) {
             mDialogInfo.user = android.os.Process.myUserHandle();
         } else {
-            UserManager userManager = (UserManager) getSystemService(Context.USER_SERVICE);
-            List<UserHandle> profiles = userManager.getUserProfiles();
-            if (!profiles.contains(mDialogInfo.user)) {
-                Log.e(TAG, "User " + android.os.Process.myUserHandle() + " can't request uninstall "
-                        + "for user " + mDialogInfo.user);
-                showUserIsNotAllowed();
-                return;
+            if (!mDialogInfo.user.equals(Process.myUserHandle())) {
+                UserManager userManager = getBaseContext().getSystemService(UserManager.class);
+                final boolean isCurrentUserProfileOwner = Process.myUserHandle().equals(
+                        userManager.getProfileParent(mDialogInfo.user));
+                if (!isCurrentUserProfileOwner) {
+                    Log.e(TAG, "User " + Process.myUserHandle() + " can't request uninstall "
+                            + "for user " + mDialogInfo.user);
+                    showUserIsNotAllowed();
+                    return;
+                }
             }
         }
 

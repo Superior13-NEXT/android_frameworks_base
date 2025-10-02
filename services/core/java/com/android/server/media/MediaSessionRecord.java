@@ -978,6 +978,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         != 0) {
                     return;
                 }
+
+                if (pi != null && pi.isActivity()) {
+                    Log.w(
+                            TAG,
+                            "Ignoring invalid media button receiver targeting an activity: " + pi);
+                    return;
+                }
+
                 mMediaButtonReceiverHolder =
                         MediaButtonReceiverHolder.create(mUserId, pi, mPackageName);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
@@ -1100,12 +1108,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         @Override
         public IBinder getBinderForSetQueue() throws RemoteException {
-            return new ParcelableListBinder<QueueItem>((list) -> {
-                synchronized (mLock) {
-                    mQueue = list;
-                }
-                mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
-            });
+            return new ParcelableListBinder<QueueItem>(
+                    QueueItem.class,
+                    (list) -> {
+                        synchronized (mLock) {
+                            mQueue = list;
+                        }
+                        mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
+                    });
         }
 
         @Override
