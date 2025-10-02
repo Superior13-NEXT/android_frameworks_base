@@ -4209,11 +4209,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
-            if (Process.isIsolated(uid)) {
-                Slog.e(TAG, "Cannot finishOperation: isolated process");
-            } else {
-                Slog.e(TAG, "Cannot finishOperation", e);
-            }
+            Slog.e(TAG, "Cannot finishOperation", e);
             return;
         }
 
