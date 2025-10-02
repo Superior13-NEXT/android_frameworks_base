@@ -1112,7 +1112,6 @@ public class DisplayPolicy {
                 if (!win.mSession.mCanAddInternalSystemWindow) {
                     attrs.windowAnimations = R.style.Animation_Toast;
                 }
-                break;
 
                 switch(Settings.System.getIntForUser(mContext.getContentResolver(),
                         Settings.System.TOAST_ANIMATION, 1, UserHandle.USER_CURRENT)) {
