@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.custom.hardware;
+package com.android.internal.lineage.hardware;
 
 import android.content.Context;
 import android.hidl.base.V1_0.IBase;
@@ -25,8 +25,8 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import com.android.internal.custom.app.LineageContextConstants;
-import com.android.internal.custom.hardware.HIDLHelper;
+import com.android.internal.lineage.app.LineageContextConstants;
+import com.android.internal.lineage.hardware.HIDLHelper;
 
 import vendor.lineage.touch.V1_0.IGloveMode;
 import vendor.lineage.touch.V1_0.IHighTouchPollingRate;

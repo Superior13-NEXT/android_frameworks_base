@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.custom.hardware;
+package com.android.internal.lineage.hardware;
 
 import java.util.ArrayList;
 
