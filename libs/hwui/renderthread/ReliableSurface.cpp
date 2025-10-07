@@ -188,7 +188,7 @@ int ReliableSurface::hook_dequeueBuffer(ANativeWindow* window,
 
     int result = dequeueBuffer(window, buffer, fenceFd);
     if (result != OK) {
-        ALOGW("dequeueBuffer failed, error = %d; switching to fallback", result);
+        //ALOGW("dequeueBuffer failed, error = %d; switching to fallback", result);
         *buffer = rs->acquireFallbackBuffer(result);
         *fenceFd = -1;
         return *buffer ? OK : INVALID_OPERATION;
