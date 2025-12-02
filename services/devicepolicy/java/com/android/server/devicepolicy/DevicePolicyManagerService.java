@@ -7716,30 +7716,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     // be disabled device-wide.
     private void pushScreenCapturePolicy(int adminUserId) {
         // Update screen capture device-wide if disabled by the DO or COPE PO on the parent profile.
-        ActiveAdmin admin =
-                getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(
+        // Always do this regardless which user this method is called with. Probably a little
+        // wasteful but still safe.
+        ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(
                         UserHandle.USER_SYSTEM);
-        if (admin != null && admin.disableScreenCapture) {
-            setScreenCaptureDisabled(UserHandle.USER_ALL);
-        } else {
-            // Otherwise, update screen capture only for the calling user.
-            admin = getProfileOwnerAdminLocked(adminUserId);
-            if (admin != null && admin.disableScreenCapture) {
-                setScreenCaptureDisabled(adminUserId);
-            } else {
-                setScreenCaptureDisabled(UserHandle.USER_NULL);
-            }
-        }
+        setScreenCaptureDisabled(UserHandle.USER_ALL, admin != null && admin.disableScreenCapture);
+        // Update screen capture only for the calling user.
+        admin = getProfileOwnerAdminLocked(adminUserId);
+        setScreenCaptureDisabled(adminUserId, admin != null && admin.disableScreenCapture);
     }
 
     // Set the latest screen capture policy, overriding any existing ones.
     // userHandle can be one of USER_ALL, USER_NULL or a concrete userId.
-    private void setScreenCaptureDisabled(int userHandle) {
-        int current = mPolicyCache.getScreenCaptureDisallowedUser();
-        if (userHandle == current) {
-            return;
-        }
-        mPolicyCache.setScreenCaptureDisallowedUser(userHandle);
+    private void setScreenCaptureDisabled(int userHandle, boolean disabled) {
+        mPolicyCache.setScreenCaptureDisallowedUser(userHandle, disabled);
         updateScreenCaptureDisabled();
     }
 
@@ -8886,7 +8876,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return false;
             }
 
-            if (isAdb(caller)) {
+            boolean isAdb = isAdb(caller);
+            if (isAdb) {
                 // Log profile owner provisioning was started using adb.
                 MetricsLogger.action(mContext, PROVISIONING_ENTRY_POINT_ADB, LOG_TAG_PROFILE_OWNER);
                 DevicePolicyEventLogger
@@ -8909,6 +8900,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             UserRestrictionsUtils.getDefaultEnabledForManagedProfiles());
                     ensureUnknownSourcesRestrictionForProfileOwnerLocked(userHandle, admin,
                             true /* newOwner */);
+                    if (isAdb) {
+                        // DISALLOW_DEBUGGING_FEATURES is being added to newly-created
+                        // work profile by default due to b/382064697 . This would have
+                        //  impacted certain CTS test flows when they interact with the
+                        // work profile via ADB (for example installing an app into the
+                        // work profile). Remove DISALLOW_DEBUGGING_FEATURES here to
+                        // reduce the potential impact.
+                        admin.ensureUserRestrictions().putBoolean(
+                            UserManager.DISALLOW_DEBUGGING_FEATURES, false);
+                        saveUserRestrictionsLocked(userHandle);
+                    }
                 }
                 sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED,
                         userHandle);

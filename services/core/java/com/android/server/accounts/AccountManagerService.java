@@ -185,6 +185,7 @@ public class AccountManagerService
 
     final MessageHandler mHandler;
 
+    private static final int TIMEOUT_DELAY_MS = 1000 * 60 * 15;
     // Messages that can be sent on mHandler
     private static final int MESSAGE_TIMED_OUT = 3;
     private static final int MESSAGE_COPY_SHARED_ACCOUNT = 4;
@@ -1171,6 +1172,10 @@ public class AccountManagerService
                             // updating). So purge its data from the account databases.
                             obsoleteAuthType.add(type);
                             // And delete it from the TABLE_META
+                            accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
+                        } else if (knownUid != null && knownUid != uid) {
+                            Slog.w(TAG, "authenticator no longer exist for type " + type);
+                            obsoleteAuthType.add(type);
                             accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
                         }
                     }
@@ -3081,6 +3086,12 @@ public class AccountManagerService
                                         "the type and name should not be empty");
                                 return;
                             }
+                            if (!type.equals(mAccountType)) {
+                                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                                        "incorrect account type");
+                                return;
+                            }
+
                             Account resultAccount = new Account(name, type);
                             if (!customTokens) {
                                 saveAuthTokenToDatabase(
@@ -3573,6 +3584,11 @@ public class AccountManagerService
 
             // Strip auth token from result.
             result.remove(AccountManager.KEY_AUTHTOKEN);
+            if (!checkKeyIntent(Binder.getCallingUid(), result)) {
+                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                        "invalid intent in bundle returned");
+                return;
+            }
 
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG,
@@ -4864,6 +4880,7 @@ public class AccountManagerService
             synchronized (mSessions) {
                 mSessions.put(toString(), this);
             }
+            scheduleTimeout();
             if (response != null) {
                 try {
                     response.asBinder().linkToDeath(this, 0 /* flags */);
@@ -4913,6 +4930,9 @@ public class AccountManagerService
                 if (resolveInfo == null) {
                     return false;
                 }
+                if ("content".equals(intent.getScheme())) {
+                    return false;
+                }
                 ActivityInfo targetActivityInfo = resolveInfo.activityInfo;
                 int targetUid = targetActivityInfo.applicationInfo.uid;
                 PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
@@ -4925,6 +4945,8 @@ public class AccountManagerService
                     Log.e(TAG, String.format(tmpl, activityName, pkgName, mAccountType));
                     return false;
                 }
+                intent.setComponent(targetActivityInfo.getComponentName());
+                bundle.putParcelable(AccountManager.KEY_INTENT, intent);
                 return true;
             } finally {
                 Binder.restoreCallingIdentity(bid);
@@ -4946,14 +4968,15 @@ public class AccountManagerService
             Bundle simulateBundle = p.readBundle();
             p.recycle();
             Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT, Intent.class);
-            if (intent != null && intent.getClass() != Intent.class) {
-                return false;
-            }
             Intent simulateIntent = simulateBundle.getParcelable(AccountManager.KEY_INTENT,
                     Intent.class);
             if (intent == null) {
                 return (simulateIntent == null);
             }
+            if (intent.getClass() != Intent.class || simulateIntent.getClass() != Intent.class) {
+                return false;
+            }
+
             if (!intent.filterEquals(simulateIntent)) {
                 return false;
             }
@@ -5031,6 +5054,11 @@ public class AccountManagerService
             }
         }
 
+        private void scheduleTimeout() {
+            mHandler.sendMessageDelayed(
+                    mHandler.obtainMessage(MESSAGE_TIMED_OUT, this), TIMEOUT_DELAY_MS);
+        }
+
         public void cancelTimeout() {
             mHandler.removeMessages(MESSAGE_TIMED_OUT, this);
         }
@@ -5069,6 +5097,9 @@ public class AccountManagerService
 
         public void onTimedOut() {
             IAccountManagerResponse response = getResponseAndClose();
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Session.onTimedOut");
+            }
             if (response != null) {
                 try {
                     response.onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
@@ -5153,6 +5184,11 @@ public class AccountManagerService
                     } else {
                         if (mStripAuthTokenFromResult) {
                             result.remove(AccountManager.KEY_AUTHTOKEN);
+                            if (!checkKeyIntent(Binder.getCallingUid(), result)) {
+                                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                                        "invalid intent in bundle returned");
+                                return;
+                            }
                         }
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
                             Log.v(TAG, getClass().getSimpleName()
