@@ -56,7 +56,6 @@ import android.view.Window;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.util.superior.GamesPropsUtils;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -65,7 +64,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import com.android.internal.util.superior.PixelPropsUtils;
 import com.android.internal.util.superior.HideDeveloperStatusUtils;
 
 /**
@@ -1246,9 +1244,6 @@ public class Instrumentation {
         Application app = getFactory(context.getPackageName())
                 .instantiateApplication(cl, className);
         app.attach(context);
-        String packageName = context.getPackageName();
-        PixelPropsUtils.setProps(packageName);
-        GamesPropsUtils.setProps(context);
         return app;
     }
     
@@ -1266,9 +1261,6 @@ public class Instrumentation {
             ClassNotFoundException {
         Application app = (Application)clazz.newInstance();
         app.attach(context);
-        String packageName = context.getPackageName();
-        PixelPropsUtils.setProps(packageName);
-        GamesPropsUtils.setProps(context);
         return app;
     }
 
