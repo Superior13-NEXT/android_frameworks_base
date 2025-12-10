@@ -3527,13 +3527,6 @@ public class UserManagerService extends IUserManager.Stub {
         if (userData.persistSeedData) {
             if (userData.seedAccountName != null) {
                 serializer.attribute(null, ATTR_SEED_ACCOUNT_NAME,
-<<<<<<< HEAD
-                        truncateString(userData.seedAccountName));
-            }
-            if (userData.seedAccountType != null) {
-                serializer.attribute(null, ATTR_SEED_ACCOUNT_TYPE,
-                        truncateString(userData.seedAccountType));
-=======
                         truncateString(userData.seedAccountName,
                                 UserManager.MAX_ACCOUNT_STRING_LENGTH));
             }
@@ -3541,16 +3534,11 @@ public class UserManagerService extends IUserManager.Stub {
                 serializer.attribute(null, ATTR_SEED_ACCOUNT_TYPE,
                         truncateString(userData.seedAccountType,
                                 UserManager.MAX_ACCOUNT_STRING_LENGTH));
->>>>>>> a98de11b4a7382b1242d5ab627fe897fc8b3f983
             }
         }
         if (userInfo.name != null) {
             serializer.startTag(null, TAG_NAME);
-<<<<<<< HEAD
-            serializer.text(truncateString(userInfo.name));
-=======
             serializer.text(truncateString(userInfo.name, UserManager.MAX_USER_NAME_LENGTH));
->>>>>>> a98de11b4a7382b1242d5ab627fe897fc8b3f983
             serializer.endTag(null, TAG_NAME);
         }
         synchronized (mRestrictionsLock) {
@@ -3590,19 +3578,11 @@ public class UserManagerService extends IUserManager.Stub {
         serializer.endDocument();
     }
 
-<<<<<<< HEAD
-    private String truncateString(String original) {
-        if (original == null || original.length() <= MAX_USER_STRING_LENGTH) {
-            return original;
-        }
-        return original.substring(0, MAX_USER_STRING_LENGTH);
-=======
     private String truncateString(String original, int limit) {
         if (original == null || original.length() <= limit) {
             return original;
         }
         return original.substring(0, limit);
->>>>>>> a98de11b4a7382b1242d5ab627fe897fc8b3f983
     }
 
     /*
@@ -4014,12 +3994,7 @@ public class UserManagerService extends IUserManager.Stub {
             boolean preCreate, @Nullable String[] disallowedPackages,
             @NonNull TimingsTraceAndSlog t, @Nullable Object token)
                     throws UserManager.CheckedUserOperationException {
-<<<<<<< HEAD
-
-        String truncatedName = truncateString(name);
-=======
         String truncatedName = truncateString(name, UserManager.MAX_USER_NAME_LENGTH);
->>>>>>> a98de11b4a7382b1242d5ab627fe897fc8b3f983
         final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
         if (userTypeDetails == null) {
             Slog.e(LOG_TAG, "Cannot create user of invalid user type: " + userType);
@@ -5593,11 +5568,6 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.e(LOG_TAG, "No such user for settings seed data u=" + userId);
                     return;
                 }
-<<<<<<< HEAD
-                userData.seedAccountName = truncateString(accountName);
-                userData.seedAccountType = truncateString(accountType);
-                userData.seedAccountOptions = accountOptions;
-=======
                 userData.seedAccountName = truncateString(accountName,
                         UserManager.MAX_ACCOUNT_STRING_LENGTH);
                 userData.seedAccountType = truncateString(accountType,
@@ -5606,7 +5576,6 @@ public class UserManagerService extends IUserManager.Stub {
                         UserManager.MAX_ACCOUNT_OPTIONS_LENGTH)) {
                     userData.seedAccountOptions = accountOptions;
                 }
->>>>>>> a98de11b4a7382b1242d5ab627fe897fc8b3f983
                 userData.persistSeedData = persist;
             }
             if (persist) {
